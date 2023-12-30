@@ -85,5 +85,19 @@ group by region_id,
 
  ![image](https://github.com/alankritm95/8weeksqlchallenge-4/assets/129503746/a7f00a8e-09af-441c-91ed-43e2ee1c1bc6)
 
+ with cte1 as (select c.region_id, region_name,
+TIMESTAMPDIFF(DAY, start_date, end_date) as diff_days
+ from customer_nodes c join regions r on c.region_id = r.region_id
+ WHERE end_date!='9999-12-31'),
+ 
+cte2 as (select *, percent_rank() over(partition by region_id order by diff_days) * 100 as p from cte1)
+ 
+ select region_id, region_name, avg(diff_days) from cte2
+ where p > 50
+ group by region_id, region_name ;
+
+ ![image](https://github.com/alankritm95/8weeksqlchallenge-4/assets/129503746/f646a2fb-2635-4d7e-aea0-f3cf409c1f20)
+
+
 
 
