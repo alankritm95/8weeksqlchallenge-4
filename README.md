@@ -99,5 +99,41 @@ cte2 as (select *, percent_rank() over(partition by region_id order by diff_days
  ![image](https://github.com/alankritm95/8weeksqlchallenge-4/assets/129503746/f646a2fb-2635-4d7e-aea0-f3cf409c1f20)
 
 
+## Case Study Questions
+
+### What is the unique count and total amount for each transaction type?
+
+select  txn_type, count(*) as count, sum(txn_amount) as total_amt from customer_transactions
+group by txn_type;
+
+![image](https://github.com/alankritm95/8weeksqlchallenge-4/assets/129503746/1ffd6c55-7314-4beb-9e7b-d07bfac42596)
+
+
+### What is the average total historical deposit counts and amounts for all customers?
+
+WITH cte1 AS (
+  SELECT 
+    customer_id, 
+    COUNT(customer_id) AS txn_count, 
+    AVG(txn_amount) AS avg_amount
+  FROM customer_transactions
+  WHERE txn_type = 'deposit'
+  GROUP BY customer_id
+)
+
+SELECT 
+  ROUND(AVG(txn_count)) AS avg_deposit_count, 
+  ROUND(AVG(avg_amount)) AS avg_deposit_amt
+FROM cte1;
+
+![image](https://github.com/alankritm95/8weeksqlchallenge-4/assets/129503746/fb1f1504-2dde-404e-aca7-ccd15b6eae3e)
+
+
+
+### For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
+
+
+### What is the closing balance for each customer at the end of the month?
+
 
 
