@@ -129,11 +129,52 @@ FROM cte1;
 ![image](https://github.com/alankritm95/8weeksqlchallenge-4/assets/129503746/fb1f1504-2dde-404e-aca7-ccd15b6eae3e)
 
 
-
 ### For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
+
+WITH transaction_count_per_month_cte AS
+  (SELECT customer_id,
+          month(txn_date) AS txn_month,
+          SUM(IF(txn_type="deposit", 1, 0)) AS deposit_count,
+          SUM(IF(txn_type="withdrawal", 1, 0)) AS withdrawal_count,
+          SUM(IF(txn_type="purchase", 1, 0)) AS purchase_count
+   FROM customer_transactions
+   GROUP BY customer_id,
+            month(txn_date))
+SELECT txn_month,
+       count(DISTINCT customer_id) as customer_count
+FROM transaction_count_per_month_cte
+WHERE deposit_count>1
+  AND (purchase_count = 1
+       OR withdrawal_count = 1)
+GROUP BY txn_month;
+
+
+![image](https://github.com/alankritm95/8weeksqlchallenge-4/assets/129503746/f30a375a-ca67-477d-9bfc-3cb65aece25f)
+
 
 
 ### What is the closing balance for each customer at the end of the month?
+
+WITH cte1 AS
+  (SELECT customer_id,
+          month(txn_date) AS txn_month,
+          SUM(CASE
+                  WHEN txn_type="deposit" THEN txn_amount
+                  ELSE -txn_amount
+              END) AS net_transaction_amt
+   FROM customer_transactions
+   GROUP BY customer_id,
+            month(txn_date)
+   ORDER BY customer_id)
+SELECT customer_id,
+       txn_month,
+       net_transaction_amt,
+       sum(net_transaction_amt) over(PARTITION BY customer_id
+                                     ORDER BY txn_month ROWS BETWEEN UNBOUNDED preceding AND CURRENT ROW) AS closing_balance
+FROM cte1;
+
+![image](https://github.com/alankritm95/8weeksqlchallenge-4/assets/129503746/aa9d0bef-3876-419e-a208-88d30a73bbfb)
+
 
 
 
